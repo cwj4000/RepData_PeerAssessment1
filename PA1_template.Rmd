@@ -69,7 +69,10 @@ weekday.or.weekend <- function(date) {
 }
 
 activity2$date <-as.Date(activity2$date)
-for (i in 1:length(activity2$date)) x[i]<-weekday.or.weekend(activity2$date[i])
+x<-character(0)
+for (i in 1:length(activity2$date)){ x[i]<-weekday.or.weekend(activity2$date[i])}
+
+activity2<-cbind(activity2,x)
 weekday<-activity2[activity2$x=='weekday',]
 #aggStep<-aggregate(x = activity2$steps,by = list(activity2$date),FUN = mean)
 
@@ -81,3 +84,4 @@ aggInterval<-aggregate(x = weekend$steps,by = list(weekend$interval),FUN = sum)
 plot(x = aggInterval$Group.1,y = aggInterval$x,type = "l",xlab="Intervals",ylab="Steps",main="WeekEnds")
 
 ```
+
