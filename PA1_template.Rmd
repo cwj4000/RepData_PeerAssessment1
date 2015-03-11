@@ -7,19 +7,77 @@ output:
 
 
 ## Loading and preprocessing the data
-
+```{r}
+activity<- read.csv("activity.csv")
+head(activity)
+tail(activity)
+```
 
 
 ## What is mean total number of steps taken per day?
-
+```{r}
+steps<-setNames(aggregate(activity$steps,by=list(activity$date),FUN=mean),c("Date","Mean Steps"))
+steps[,1]<-as.numeric(steps[,1])
+library(ggplot2)
+plot(steps[,1],steps[,2],xlab="Day",ylab="Mean Steps",main="Mean total steps taken per day",type="h")
+```
 
 
 ## What is the average daily activity pattern?
-
+```{r}
+daily<-setNames(aggregate(activity$steps,by=list(activity$interval),FUN=mean,na.rm=T),c("Interval","Steps"))
+library(ggplot2)
+plot(daily[,1],daily[,2],type="l",xlab="Interval",ylab="Steps",main="Average Daily Activity Pattern")
+```
 
 
 ## Imputing missing values
+```{r}
+naValues<-which(is.na(activity$steps))
+meanSteps<-mean(steps$'Mean Steps',na.rm=T)
+activity2<-activity
+for (n in naValues) activity2$steps[n]<-meanSteps
+steps2<-setNames(aggregate(activity2$steps,by=list(activity2$date),FUN=mean),c("Date","Mean Steps"))
+steps2[,1]<-as.numeric(steps2[,1])
+library(ggplot2)
+plot(steps2[,1],steps2[,2],xlab="Day",ylab="Mean Steps",main="Mean total steps taken per day",type="h")
+```
 
+#### Mean and Median total number of steps Excluding NA values
+```{r}
+mean<-sum(steps$'Mean Steps',na.rm=T)/length(steps$'Mean Steps')
+print(mean)
+median(steps$'Mean Steps',na.rm=T)
+```
 
-
+#### Mean and Median total number of steps Including NA values that are replaced
+```{r}
+mean(steps2$'Mean Steps')
+median(steps2$'Mean Steps')
+```
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+weekday.or.weekend <- function(date) {
+    day <- weekdays(date)
+    if (day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
+        return("weekday")
+    else if (day %in% c("Saturday", "Sunday"))
+        return("weekend")
+    else
+        stop("invalid date")
+}
+
+activity2$date <-as.Date(activity2$date)
+for (i in 1:length(activity2$date)) x[i]<-weekday.or.weekend(activity2$date[i])
+weekday<-activity2[activity2$x=='weekday',]
+#aggStep<-aggregate(x = activity2$steps,by = list(activity2$date),FUN = mean)
+
+aggInterval<-aggregate(x = weekday$steps,by = list(weekday$interval),FUN = sum)
+plot(x = aggInterval$Group.1,y = aggInterval$x,type = "l",xlab="Intervals",ylab="Steps",main="Weekdays")
+
+weekend<-activity2[activity2$x=='weekend',]
+aggInterval<-aggregate(x = weekend$steps,by = list(weekend$interval),FUN = sum)
+plot(x = aggInterval$Group.1,y = aggInterval$x,type = "l",xlab="Intervals",ylab="Steps",main="WeekEnds")
+
+```
